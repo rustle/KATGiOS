@@ -1,0 +1,12 @@
+[submodule "KATG/ThirdParty/ESNetworking"]
+	path = KATG/ThirdParty/ESNetworking
+	url = https://github.com/rustle/ESNetworking.git
+[submodule "KATG/ThirdParty/ESObjectMap"]
+	path = KATG/ThirdParty/ESObjectMap
+	url = https://github.com/rustle/ESObjectMap.git
+[submodule "KATG/ThirdParty/ARCLogic"]
+	path = KATG/ThirdParty/ARCLogic
+	url = https://github.com/rustle/ARCLogic.git
+[submodule "KATG/ThirdParty/Reachability"]
+	path = KATG/ThirdParty/Reachability
+	url = https://github.com/rustle/Reachability.git

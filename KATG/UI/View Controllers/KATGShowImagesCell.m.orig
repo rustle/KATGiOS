@@ -1,0 +1,172 @@
+//
+//  KATGShowImagesCell.m
+//  KATG
+//
+//  Created by Timothy Donnelly on 12/10/12.
+//  Copyright (c) 2012 Doug Russell. All rights reserved.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+#import "KATGShowImagesCell.h"
+#import "KATGShowImageThumbnailCell.h"
+#import "KATGImageCache.h"
+#import "KATGImage.h"
+
+#define SIDE_MARGIN 20.0f
+#define INTER_IMAGE_GAP 10.0f
+
+static NSString *imageThumbnailCellIdentifier = @"imageThumbnailCellIdentifier";
+
+@interface KATGShowImagesCell () <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, KATGShowImageThumbnailCellDelegate>
+@property (strong, nonatomic) UICollectionView *collectionView;
+@end
+
+@implementation KATGShowImagesCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self)
+	{
+		self.backgroundColor = [UIColor orangeColor];
+		UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+		flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+		flowLayout.minimumInteritemSpacing = 0.0f;
+		flowLayout.minimumLineSpacing = 0.0f;
+		self.collectionView = [[UICollectionView alloc] initWithFrame:self.contentView.bounds collectionViewLayout:flowLayout];
+		self.collectionView.delegate = self;
+		self.collectionView.dataSource = self;
+		self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+		self.collectionView.backgroundColor = [UIColor clearColor];
+		[self.collectionView registerClass:[KATGShowImageThumbnailCell class] forCellWithReuseIdentifier:imageThumbnailCellIdentifier];
+		[self.contentView addSubview:self.collectionView];
+    }
+    return self;
+}
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	[self.collectionView reloadData];
+}
+
+#pragma mark - UICollectionView
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+	return [self.images count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+<<<<<<< HEAD
+		KATGShowImageThumbnailCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:imageThumbnailCellIdentifier
+																																					 forIndexPath:indexPath];
+		KATGImage *image = [self.images objectAtIndex:indexPath.row];
+		
+		cell.currentImage = image;
+		cell.delegate = self;
+		cell.imageView.image = nil;
+		
+		NSURL *url = [NSURL URLWithString:cell.currentImage.media_url];
+		
+		__block KATGImage *bImage = image;
+		__block KATGShowImageThumbnailCell *bThumbCell = cell;
+		
+		[[KATGImageCache imageCache] imageForURL:url completionHandler:^(UIImage *img, NSError *error) {
+				if (bThumbCell.currentImage == bImage)
+				{
+						dispatch_async(dispatch_get_main_queue(), ^{
+								bThumbCell.imageView.image = img;
+								[bThumbCell.activityIndicatorView stopAnimating];
+								bThumbCell.activityIndicatorView.hidden = YES;
+						});
+				}
+		}];
+		
+		return cell;
+=======
+	KATGShowImageThumbnailCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:imageThumbnailCellIdentifier forIndexPath:indexPath];
+	KATGImage *image = self.images[indexPath.row];
+	cell.currentImage = image;
+	cell.imageView.image = nil;
+	NSURL *url = [NSURL URLWithString:cell.currentImage.media_url];
+	__weak KATGImage *weakImage = image;
+	__weak KATGShowImageThumbnailCell *weakThumbCell = cell;
+	[[KATGImageCache imageCache] imageForURL:url completionHandler:^(UIImage *img, NSError *error) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if ([[weakThumbCell.currentImage objectID] isEqual:[weakImage objectID]])
+			{
+				weakThumbCell.imageView.image = img;
+				[weakThumbCell.activityIndicatorView stopAnimating];
+				weakThumbCell.activityIndicatorView.hidden = YES;
+			}
+		});
+	}];
+	
+	return cell;
+>>>>>>> 94b01d66059c03f503c51e54c3e5f71367914441
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+	CGFloat size = self.collectionView.frame.size.height;
+	return CGSizeMake(size, size);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+	return INTER_IMAGE_GAP;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+	return INTER_IMAGE_GAP;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+	return CGSizeMake(SIDE_MARGIN, self.collectionView.frame.size.height);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
+{
+	return CGSizeMake(SIDE_MARGIN, self.collectionView.frame.size.height);
+}
+
+- (void)setImages:(NSArray *)images
+{
+	_images = images;
+	[self.collectionView reloadData];
+}
+
+- (void)scrollToImageAtIndex:(NSInteger)index animated:(BOOL)animated
+{
+		[self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:animated];
+}
+
+- (UIView *)viewForImageAtIndex:(NSInteger)index
+{
+		KATGShowImageThumbnailCell *thumbCell = (KATGShowImageThumbnailCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+		return thumbCell.imageView;
+}
+
+#pragma mark - KATGShowImageThumbnailCellDelegate
+
+- (void)imageThumbnailCellWasTapped:(KATGShowImageThumbnailCell *)thumbnailCell
+{
+		[self.delegate showImagesCell:self thumbnailWasTappedForImage:thumbnailCell.currentImage inImageView:thumbnailCell.imageView];
+}
+
+@end
