@@ -71,7 +71,6 @@
 @property (weak, nonatomic) IBOutlet KATGSearchBar *searchBar;
 
 @property (nonatomic) KATGShowViewController *currentlyPresentedShowViewController;
-@property (nonatomic) UINavigationController *currentlyPresentedShowNavigationController;
 @property (nonatomic) UIView *modalPresentationDimmerView;
 
 // Layout constraints for modification at runtime
@@ -131,8 +130,6 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
 	
 	[self configureTabBar];
-	
-	[self.navigationBar setItems:@[self.navigationItem] animated:NO];
 	[self configureNavBar];
 	
 	self.mainDataSource.mainCollectionView = self.collectionView;
@@ -185,6 +182,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	{
 		return;
 	}
+	[self.navigationBar setItems:@[self.navigationItem] animated:NO];
 	if ([[KATGPlaybackManager sharedManager] currentShow])
 	{
 		// [self.navigationItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Now Playing" style:UIBarButtonItemStyleBordered target:self action:@selector(nowPlaying:)] animated:YES];
@@ -272,7 +270,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
 	[super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-	if (self.currentlyPresentedShowNavigationController)
+	if (self.currentlyPresentedShowViewController)
 	{
 		KATGShow *show = self.currentlyPresentedShowViewController.show;
 		NSParameterAssert(show);
@@ -313,9 +311,9 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 {	
 	if (!self.modalPresentationDimmerView)
 	{
-		self.modalPresentationDimmerView = [[UIView alloc] init];
+		self.modalPresentationDimmerView = [UIView new];
 		self.modalPresentationDimmerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-		self.modalPresentationDimmerView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:1.0f];
+		self.modalPresentationDimmerView.backgroundColor = [UIColor blackColor];
 	}
 	self.modalPresentationDimmerView.frame = self.view.bounds;
 	[self.view addSubview:self.modalPresentationDimmerView];
@@ -352,23 +350,18 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	showViewController.delegate = self;
 	showViewController.showObjectID = [show objectID];
 	self.currentlyPresentedShowViewController = showViewController;
-	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:showViewController];
-	navController.view.backgroundColor = [UIColor clearColor];
-	navController.navigationBarHidden = YES;
-	self.currentlyPresentedShowNavigationController = navController;
 	
 	// Prepare the show view controller for presentation
 	showViewController.collapsedFooterHeight = showView.footerHeight;
 	
-	[navController willMoveToParentViewController:self];
-	[self addChildViewController:navController];
-	[self.view addSubview:navController.view];
-	navController.view.frame = self.view.bounds;
-	showViewController.view.frame = navController.view.bounds;
+	[showViewController willMoveToParentViewController:self];
+	[self addChildViewController:showViewController];
+	[self.view addSubview:showViewController.view];
+	showViewController.view.frame = self.view.bounds;
 	
 	// find the starting rect for the show view within the view controller.
 	CGRect showViewRect = showView.bounds;
-	CGPoint center = [navController.view convertPoint:showView.center fromView:showView.superview];
+	CGPoint center = [showViewController.view convertPoint:showView.center fromView:showView.superview];
 	showViewRect.origin.x = center.x - (showViewRect.size.width/2);
 	showViewRect.origin.y = center.y - (showViewRect.size.height/2);
 	showViewController.collapsedShowViewRect = showViewRect;
@@ -383,10 +376,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	// This is dispatched async because there was a nasty animation jump occuring with the meta columns in the footer.
 	// I was unable to track it down, but there is probably a cleaner way to solve this.
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[UIView animateWithDuration:0.5f
-							  delay:0.0f
-							options:0
-						 animations:^{
+		[UIView animateWithDuration:0.5f delay:0.0f options:0 animations:^{
 							 for (UICollectionViewCell *cell in visibleCells)
 							 {
 								 cell.transform = CGAffineTransformMakeScale(0.5f, 0.5f);
@@ -395,7 +385,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 						 }
 						 completion:^(BOOL finished) {
 							 self.collectionView.hidden = YES;
-							 [navController didMoveToParentViewController:self];
+							 [showViewController didMoveToParentViewController:self];
 						 }];
 	});
 }
@@ -419,7 +409,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	NSArray *visibleCells = [self.collectionView visibleCells];
 	self.collectionView.hidden = NO;
 	
-	[self.currentlyPresentedShowNavigationController willMoveToParentViewController:nil];
+	[self.currentlyPresentedShowViewController willMoveToParentViewController:nil];
 	[self removeDimmingViewForModalWithDuration:0.5f];
 	
 	[UIView animateWithDuration:0.5f delay:0.0f options:0
@@ -432,11 +422,9 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 					 }
 					 completion:^(BOOL finished) {
 						 self.currentlyPresentedShowViewController.delegate = nil;
-						 [self.currentlyPresentedShowNavigationController.view removeFromSuperview];
-						 [self.currentlyPresentedShowNavigationController didMoveToParentViewController:nil];
-						 [self.currentlyPresentedShowNavigationController setViewControllers:nil];
+						 [self.currentlyPresentedShowViewController.view removeFromSuperview];
+						 [self.currentlyPresentedShowViewController didMoveToParentViewController:nil];
 						 self.currentlyPresentedShowViewController = nil;
-						 self.currentlyPresentedShowNavigationController = nil;
 					 }];
 }
 

@@ -305,7 +305,6 @@ typedef enum {
 				KATGShowImagesTableViewCell *imagesCell = [tableView dequeueReusableCellWithIdentifier:kKATGShowDetailsSectionCellIdentifierImages forIndexPath:indexPath];
 				imagesCell.images = [self.show.images sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"index" ascending:YES]]];
 				imagesCell.delegate = self;
-				imagesCell.backgroundColor = [UIColor purpleColor];
 				cell = imagesCell;
 			}
 			else

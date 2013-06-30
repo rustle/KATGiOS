@@ -130,7 +130,7 @@
 CGFloat randomBetweenF(CGFloat min, CGFloat max)
 {
 	CGFloat difference = max - min;
-	CGFloat result = ((float)(arc4random() % (RAND_MAX + 1)) / RAND_MAX) * difference;
+	CGFloat result = ((float)(arc4random() % (RAND_MAX - 1)) / RAND_MAX) * difference;
 	result += min;
 	return result;
 }

@@ -64,8 +64,8 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrame:frame];
-    if (self) 
+	self = [super initWithFrame:frame];
+	if (self) 
 	{
 		_showNumberLabel = [[KATGShowNumberLabel alloc] initWithFrame:CGRectZero];
 		_showNumberLabel.backgroundColor = [UIColor clearColor];
@@ -112,7 +112,7 @@
 		
 		self.accessibilityElements = @[_showNumberLabel, _showTitleLabel, _closeButton, self.contentView, self.footerView];
 	}
-    return self;
+	return self;
 }
 
 - (void)layoutSubviews

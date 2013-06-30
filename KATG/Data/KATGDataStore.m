@@ -466,6 +466,11 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 - (void)downloadEvents
 {
 	EventsLog(@"Download Events");
+	NSURL *url = [NSURL URLWithString:kUpcomingURIAddress relativeToURL:self.baseURL];
+	if (![self networkOperationPreflight:url])
+	{
+		return;
+	}
 	id success = ^(ESJSONOperation *op, id JSON) {
 		NSParameterAssert([JSON isKindOfClass:[NSDictionary class]]);
 		NSParameterAssert(([(NSDictionary *)JSON count] > 0));
@@ -474,7 +479,7 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 	id failure = ^(ESJSONOperation *op) {
 		[self handleError:op.error];
 	};
-	NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:kUpcomingURIAddress relativeToURL:self.baseURL]];
+	NSURLRequest *request = [NSURLRequest requestWithURL:url];
 	NSParameterAssert(request);
 	ESJSONOperation *op = [ESJSONOperation newJSONOperationWithRequest:request success:success failure:failure];
 	NSParameterAssert(op);

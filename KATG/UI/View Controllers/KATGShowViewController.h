@@ -32,7 +32,6 @@ typedef enum {
 	KATGShowViewControllerInterfaceStateCollapsed
 } KATGShowViewControllerInterfaceState;
 
-
 @interface KATGShowViewController : KATGViewController
 
 @property (nonatomic, readonly) KATGShow *show;

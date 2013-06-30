@@ -30,7 +30,7 @@
 
 + (UINavigationController *)katg_viewControllerWrappedInNavigationController;
 {
-	UINavigationController *controller = [[self alloc] initWithNibName:nil bundle:nil];
+	UINavigationController *controller = [self new];
 	return [[UINavigationController alloc] initWithRootViewController:controller];
 }
 
