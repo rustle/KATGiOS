@@ -35,11 +35,13 @@
 @property (weak, nonatomic) id<KATGLiveCellDelegate> liveShowDelegate;
 
 - (void)setLiveMode:(bool)liveMode animated:(BOOL)animated;
+- (void)endRefreshing;
 
 @end
 
 @protocol KATGLiveCellDelegate <NSObject>
 
-- (void)liveShowFeedbackButtonPressed:(KATGLiveCell *)cell;
+- (void)liveShowFeedbackButtonTapped:(KATGLiveCell *)cell;
+- (void)liveShowRefreshButtonTapped:(KATGLiveCell *)cell;
 
 @end

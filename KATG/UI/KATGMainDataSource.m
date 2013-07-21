@@ -159,13 +159,7 @@ static NSString *const kKATGArchiveCellIdentifier = @"kKATGArchiveCellIdentifier
 			break;
 		case KATGSectionLive:
 			cell = [collectionView dequeueReusableCellWithReuseIdentifier:kKATGLiveCellIdentifier forIndexPath:indexPath];
-			if ([self.events count])
-			{
-				KATGLiveCell *liveCell = (KATGLiveCell *)cell;
-				liveCell.scheduledEvent = self.events[0];
-				liveCell.liveShowDelegate = self.mainViewController;
-				[liveCell setLiveMode:[[KATGDataStore sharedStore] isShowLive] animated:NO];
-			}
+			[self configureLiveCell:(KATGLiveCell *)cell animated:NO];
 			break;
 		case KATGSectionArchive:
 		{
@@ -178,6 +172,17 @@ static NSString *const kKATGArchiveCellIdentifier = @"kKATGArchiveCellIdentifier
 		}
 	}
 	return cell;
+}
+
+- (void)configureLiveCell:(KATGLiveCell *)liveCell animated:(BOOL)animated
+{
+	KATGScheduledEvent *event = nil;
+	if ([self.events count])
+		event = self.events[0];
+	liveCell.scheduledEvent = event;
+	liveCell.liveShowDelegate = self.mainViewController;
+	[liveCell setLiveMode:[[KATGDataStore sharedStore] isShowLive] animated:animated];
+	[liveCell endRefreshing];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -256,7 +261,15 @@ static NSString *const kKATGArchiveCellIdentifier = @"kKATGArchiveCellIdentifier
 {
 	NSParameterAssert([NSThread isMainThread]);
 	[self.eventsTableView reloadData];
-	[self.mainCollectionView reloadSections:[NSIndexSet indexSetWithIndex:KATGSectionLive]];
+	NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:KATGSectionLive];
+	if ([[self.mainCollectionView indexPathsForVisibleItems] containsObject:indexPath])
+	{
+		KATGLiveCell *cell = (KATGLiveCell *)[self.mainCollectionView cellForItemAtIndexPath:indexPath];
+		if (cell)
+		{
+			[self configureLiveCell:cell animated:YES];
+		}
+	}
 }
 
 - (void)didChangeShows
@@ -368,7 +381,7 @@ static NSString *const kKATGArchiveCellIdentifier = @"kKATGArchiveCellIdentifier
 			case KATGSectionLive:
 				return NSLocalizedString(@"scrolled to live show", nil);
 			case KATGSectionArchive:
-				return NSLocalizedString(@"scrolled to show archive", nil);
+				return NSLocalizedString(@"scrolled to episodes", nil);
 			default:
 				break;
 		}

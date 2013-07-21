@@ -27,20 +27,20 @@
 @interface KATGContentContainerView : UIView
 
 // Tracks size of the main view
-@property (strong, readonly) UIView *backgroundView;
+@property (nonatomic, readonly) UIView *backgroundView;
 
 // Height determined by headerHeight
-@property (strong, readonly) UIView *headerView;
+@property (nonatomic, readonly) UIView *headerView;
 
 // Height = main view height - headerHeight - footerHeight
-@property (strong, readonly) UIView *contentView;
+@property (nonatomic, readonly) UIScrollView *contentView;
 
 // Height determined by footerHeight
-@property (strong, readonly) UIView *footerView;
+@property (nonatomic, readonly) UIView *footerView;
 
 // These shadows overlap the content area from the header and footer
-@property (strong, readonly) TDRoundedShadowView *headerShadowView;
-@property (strong, readonly) TDRoundedShadowView *footerShadowView;
+@property (nonatomic, readonly) TDRoundedShadowView *headerShadowView;
+@property (nonatomic, readonly) TDRoundedShadowView *footerShadowView;
 
 // Header/footer metrics
 @property (nonatomic) CGFloat headerHeight;

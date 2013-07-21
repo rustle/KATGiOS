@@ -20,31 +20,20 @@
 
 #import "KATGAudioSessionManager.h"
 #import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVAudioSession.h>
 
 static void ConfigurePlaybackAudioSession(void)
 {
-	AudioSessionInitialize(NULL, // 'NULL' to use the default (main) run loop
-						   NULL, // 'NULL' to use the default run loop mode
-						   NULL, // callbacks
-						   NULL); // data to pass to your interruption listener callback
-	UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-	AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,
-							sizeof(sessionCategory),
-							&sessionCategory);
-	AudioSessionSetActive(true);
+	AVAudioSession *session = [AVAudioSession sharedInstance];
+	[session setCategory:AVAudioSessionCategoryPlayback error:nil];
+	[session setActive:YES error:nil];
 }
 
 static void ConfigureAmbientAudioSession(void)
 {
-	AudioSessionInitialize(NULL, // 'NULL' to use the default (main) run loop
-						   NULL, // 'NULL' to use the default run loop mode
-						   NULL, // callbacks
-						   NULL); // data to pass to your interruption listener callback
-	UInt32 sessionCategory = kAudioSessionCategory_AmbientSound;
-	AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,
-							sizeof(sessionCategory),
-							&sessionCategory);
-	AudioSessionSetActive(true);
+	AVAudioSession *session = [AVAudioSession sharedInstance];
+	[session setCategory:AVAudioSessionCategoryAmbient error:nil];
+	[session setActive:YES error:nil];
 }
 
 static KATGAudioSessionState _state = 0;

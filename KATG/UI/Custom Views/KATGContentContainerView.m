@@ -24,7 +24,7 @@
 
 @implementation KATGContentContainerView
 
-- (id)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame
 {
 	self = [super initWithFrame:frame];
 	if (self) 
@@ -40,7 +40,7 @@
 		_headerView = [[UIView alloc] initWithFrame:CGRectZero];
 		[self addSubview:_headerView];
 		
-		_contentView = [[UIView alloc] initWithFrame:CGRectZero];
+		_contentView = [[UIScrollView alloc] initWithFrame:CGRectZero];
 		_contentView.backgroundColor = [UIColor colorWithWhite:0.86f alpha:1.0f];
 		_contentView.clipsToBounds = YES;
 		[self addSubview:_contentView];

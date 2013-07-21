@@ -146,13 +146,13 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 	// Setup the tab bar
 	NSMutableArray *items = [NSMutableArray new];
 	
-	KATGTabBarTabItem *archiveItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"schedule-tab-icon.png"] title:@"Schedule"];
+	KATGTabBarTabItem *archiveItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"schedule-tab-icon.png"] title:NSLocalizedString(@"Schedule", nil)];
 	[items addObject:archiveItem];
 	
-	KATGTabBarTabItem *liveItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"live-tab-icon.png"] title:@"Live"];
+	KATGTabBarTabItem *liveItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"live-tab-icon.png"] title:NSLocalizedString(@"Live", nil)];
 	[items addObject:liveItem];
 	
-	KATGTabBarTabItem *scheduleItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"archive-tab-icon.png"] title:@"Archive"];
+	KATGTabBarTabItem *scheduleItem = [[KATGTabBarTabItem alloc] initWithImage:[UIImage imageNamed:@"archive-tab-icon.png"] title:NSLocalizedString(@"Episodes", nil)];
 	[items addObject:scheduleItem];
 	
 	self.tabBar.tabItems = items;
@@ -793,7 +793,7 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 
 #pragma mark - Live Show
 
-- (void)liveShowFeedbackButtonPressed:(KATGLiveCell *)cell
+- (void)liveShowFeedbackButtonTapped:(KATGLiveCell *)cell
 {
 	UIViewController *controller = [KATGLiveShowFeedbackViewController new];
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
@@ -801,6 +801,11 @@ static void * KATGIsLiveObserverContext = @"IsLiveObserverContext";
 		controller.modalPresentationStyle = UIModalPresentationFormSheet;
 	}
 	[self presentViewController:controller animated:YES completion:NULL];
+}
+
+- (void)liveShowRefreshButtonTapped:(KATGLiveCell *)cell
+{
+	[[KATGDataStore sharedStore] pollForData];
 }
 
 - (void)configureLiveCell

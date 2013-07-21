@@ -34,7 +34,9 @@
 @implementation KATGTimerTarget
 - (id)forwardingTargetForSelector:(SEL)aSelector
 {
-	return self.target;
+	id target = self.target;
+	NSAssert(target, @"Timer target has gone to nil. This will crash and is probably caused by not cleaning up the timer associated with this target.");
+	return target;
 }
 @end
 
@@ -49,14 +51,16 @@
 @property (nonatomic) KATGTimerTarget *target;
 @property (nonatomic) NSTimer *timer;
 
-@property (strong, nonatomic) UIImageView *micImageView;
-@property (strong, nonatomic) KATGCigaretteSmokeView *smokeView;
-@property (strong, nonatomic) KATGBeerBubblesView *lightBubblesView;
+@property (nonatomic) UIImageView *micImageView;
+@property (nonatomic) KATGCigaretteSmokeView *smokeView;
+@property (nonatomic) KATGBeerBubblesView *lightBubblesView;
 
 @property (nonatomic) KATGControlButton *playButton;
 @property (nonatomic) UIActivityIndicatorView *loadingIndicator;
 
-@property (strong, nonatomic) KATGButton *liveToggleButton;
+@property (nonatomic) KATGButton *liveToggleButton;
+
+@property (nonatomic) UIRefreshControl *refreshControl;
 
 @end
 
@@ -72,6 +76,11 @@
 		_containerView = [[KATGContentContainerView alloc] initWithFrame:CGRectZero];
 		_containerView.footerHeight = 8.0f;
 		[self.contentView addSubview:_containerView];
+		
+		_refreshControl = [UIRefreshControl new];
+		[_refreshControl addTarget:self action:@selector(refresh:) forControlEvents:UIControlEventValueChanged];
+		[self.containerView.contentView addSubview:_refreshControl];
+		self.containerView.contentView.alwaysBounceVertical = YES;
 		
 		_titleLabel = [[UILabel alloc] initWithFrame:_containerView.headerView.bounds];
 		_titleLabel.text = @"Next Live Show";
@@ -170,14 +179,21 @@
 
 - (void)dealloc
 {
+	[_timer invalidate];
 	[self removePlaybackManagerKVO];
+}
+
+- (void)prepareForReuse
+{
+	[super prepareForReuse];
+	[self.refreshControl endRefreshing];
 }
 
 #pragma mark - 
 
 - (void)sendFeedbackButtonPressed:(id)sender
 {
-	[self.liveShowDelegate liveShowFeedbackButtonPressed:self];
+	[self.liveShowDelegate liveShowFeedbackButtonTapped:self];
 }
 
 #pragma mark - 
@@ -196,6 +212,7 @@
 	
 	self.containerView.footerHeight = liveMode ? 44.0f : 8.0f;
 	self.playButton.alpha = liveMode ? 1.0f : 0.0f;
+	self.feedbackButton.alpha = liveMode ? 1.0f : 0.0f;
 	
 	self.feedbackButton.bounds = CGRectMake(0.0f, 0.0f, self.containerView.contentView.bounds.size.width - 20.0f, 44.0f);
 	
@@ -290,6 +307,7 @@
 - (void)setLiveMode:(bool)liveMode animated:(BOOL)animated
 {	
 	_liveMode = liveMode;
+	self.containerView.contentView.scrollEnabled = !liveMode;
 	[UIView animateWithDuration:animated ? 0.3f : 0.0f
 					 animations:^{
 						 [self layoutLiveMode];
@@ -436,6 +454,18 @@
 	
 	self.nextShowLabel.attributedText = nextShowText;
 	[self layoutLiveMode];
+}
+
+#pragma mark - 
+
+- (void)refresh:(id)sender
+{
+	[self.liveShowDelegate liveShowRefreshButtonTapped:self];
+}
+
+- (void)endRefreshing
+{
+	[self.refreshControl endRefreshing];
 }
 
 @end

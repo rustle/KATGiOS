@@ -40,6 +40,9 @@ extern NSString * const KATGDataStoreConnectivityFailureNotification;
 
 + (KATGDataStore *)sharedStore;
 
+// Poll the server for episodes, events and live show status
+- (void)pollForData;
+
 // Observable
 extern NSString *const kKATGDataStoreIsReachableViaWifiKey;
 - (BOOL)isReachableViaWifi;

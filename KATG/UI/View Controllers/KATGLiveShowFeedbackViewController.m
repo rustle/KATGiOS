@@ -33,11 +33,13 @@
 	
 	UITextField *nameTextField = [[UITextField alloc] initWithFrame:CGRectZero];
 	nameTextField.borderStyle = UITextBorderStyleRoundedRect;
+	nameTextField.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"name"];
 	[self.containerView.contentView addSubview:nameTextField];
 	self.nameTextField = nameTextField;
 	
 	UITextField *locationTextField = [[UITextField alloc] initWithFrame:CGRectZero];
 	locationTextField.borderStyle = UITextBorderStyleRoundedRect;
+	locationTextField.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"location"];
 	[self.containerView.contentView addSubview:locationTextField];
 	self.locationTextField = locationTextField;
 	
@@ -116,6 +118,14 @@
 	{
 		return;
 	}
+	if (name)
+	{
+		[[NSUserDefaults standardUserDefaults] setObject:name forKey:@"name"];
+	}
+	if (location)
+	{
+		[[NSUserDefaults standardUserDefaults] setObject:location forKey:@"location"];
+	}
 	self.nameTextField.enabled = NO;
 	self.locationTextField.enabled = NO;
 	self.messagesTextView.editable = NO;
@@ -124,17 +134,21 @@
 		__weak typeof(*weakSelf) *strongSelf = weakSelf;
 		if (strongSelf)
 		{
-			if (error)
-			{
-				// TODO: Inform user
-			}
-			else
-			{
-				strongSelf.messagesTextView.text = @"";
-			}
-			strongSelf.nameTextField.enabled = YES;
-			strongSelf.locationTextField.enabled = YES;
-			strongSelf.messagesTextView.editable = YES;
+			dispatch_async(dispatch_get_main_queue(), ^(void) {
+				if (error)
+				{
+					UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:NSLocalizedString(@"There was an error sending feedback, please check your connection and try again.", nil) delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
+					[alertView show];
+				}
+				else
+				{
+					strongSelf.messagesTextView.text = @"";
+					UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, NSLocalizedString(@"feedback sent", nil));
+				}
+				strongSelf.nameTextField.enabled = YES;
+				strongSelf.locationTextField.enabled = YES;
+				strongSelf.messagesTextView.editable = YES;
+			});
 		}
 	}];
 }

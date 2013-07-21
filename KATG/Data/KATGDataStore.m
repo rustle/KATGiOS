@@ -157,6 +157,10 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 		// Error adding persistent store
 		[NSException raise:@"Could not add persistent store" format:@"%@", [error localizedDescription]];
 	}
+	else
+	{
+		[[NSFileManager defaultManager] setAttributes:@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:[url path] error:nil];
+	}
 	
 	_writerContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
 	_writerContext.persistentStoreCoordinator = _persistentStoreCoordinator;
@@ -168,7 +172,7 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 - (NSURL *)storeURL
 {
 	NSURL *directoryURL = [[NSFileManager defaultManager] URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:nil];
-	return [directoryURL URLByAppendingPathComponent:@"katg.sqlite"];
+	return [directoryURL URLByAppendingPathComponent:@"katg2.sqlite"];
 }
 
 - (NSManagedObjectContext *)childContext
@@ -283,6 +287,11 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 }
 
 - (void)pollForData:(NSTimer *)timer
+{
+	[self pollForData];
+}
+
+- (void)pollForData
 {
 	[self downloadAllEpisodes];
 	[self downloadEvents];
@@ -425,6 +434,7 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 		}
 		else
 		{
+			[[NSFileManager defaultManager] setAttributes:@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:[fileURL path] error:nil];
 			NSManagedObjectContext *context = [self childContext];
 			NSParameterAssert(context);
 			[context performBlock:^{
@@ -971,22 +981,20 @@ NSString *const KATGDataStoreEventsDidChangeNotification = @"KATGDataStoreEvents
 #endif 
 	};
 	id networkCompletion = ^(ESHTTPOperation *op) {
-		dispatch_async(dispatch_get_main_queue(), ^(void) {
-			if (op.error)
+		if (op.error)
+		{
+			if (completion)
 			{
-				if (completion)
-				{
-					completion(op.error);
-				}
+				completion(op.error);
 			}
-			else
+		}
+		else
+		{
+			if (completion)
 			{
-				if (completion)
-				{
-					completion(nil);
-				}
+				completion(nil);
 			}
-		});
+		}
 	};
 	ESHTTPOperation *op = [ESHTTPOperation newHTTPOperationWithRequest:request work:networkWork completion:networkCompletion];
 	NSParameterAssert(op);
